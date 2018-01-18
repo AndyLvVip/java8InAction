@@ -10,8 +10,15 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.IntSupplier;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.maxBy;
+import static java.util.stream.Collectors.minBy;
+import static java.util.stream.Collectors.summarizingInt;
 
 /**
  * @Author: andy.lv
@@ -131,7 +138,7 @@ public class TestFiltering {
     public void sortYear() {
         List<Integer> years = Arrays.asList(2001, 2002, 2010, 2004, 2003, 2009);
         years.stream()
-                .sorted(Comparator.comparing((Integer i) -> i).reversed())
+                .sorted(comparing((Integer i) -> i).reversed())
                 .forEach(System.out::println);
 
     }
@@ -204,5 +211,53 @@ public class TestFiltering {
                 .distinct()
                 .count();
         System.out.println(uniqueWords);
+    }
+
+    @Test
+    public void infiniteStreams() {
+        Stream.iterate(new int[] {0, 1}, t -> new int[] {t[1], t[0] + t[1]})
+                .limit(10)
+                .forEach(t -> System.out.println(t[0] + ", " + t[1]));
+    }
+
+    @Test
+    public void infiniteStreams_generate() {
+        IntSupplier is = new IntSupplier() {
+            int prev = 0;
+            int current = 1;
+            @Override
+            public int getAsInt() {
+                int result = prev;
+                prev = current;
+                current = result + prev;
+                return result;
+            }
+        };
+        IntStream.generate(is).limit(10)
+                .forEach(System.out::println);
+    }
+
+    @Test
+    public void collectMax() {
+        Arrays.asList(1, 2, 3, 4, 5)
+                .stream()
+                .collect(maxBy(Comparator.comparingInt((Integer i) -> i)))
+        .ifPresent(System.out::println);
+    }
+
+    @Test
+    public void collectMin() {
+        Arrays.asList("welcome", "hello", "world")
+                .stream()
+                .collect(minBy(comparing((s) -> s)))
+                .ifPresent(System.out::println);
+    }
+
+    @Test
+    public void summingInt() {
+        int tlen = Arrays.asList("hello", "world", "welcome")
+                .stream()
+                .collect(Collectors.summingInt(String::length));
+        System.out.println(tlen);
     }
 }
