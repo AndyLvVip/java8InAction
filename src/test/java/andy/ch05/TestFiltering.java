@@ -7,18 +7,14 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.IntSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.maxBy;
-import static java.util.stream.Collectors.minBy;
-import static java.util.stream.Collectors.summarizingInt;
+import static java.util.stream.Collectors.*;
 
 /**
  * @Author: andy.lv
@@ -259,5 +255,83 @@ public class TestFiltering {
                 .stream()
                 .collect(Collectors.summingInt(String::length));
         System.out.println(tlen);
+    }
+
+    @Test
+    public void averagingInt() {
+       double average = Arrays.asList(2, 4, 6, 8, 10)
+                .stream()
+                .collect(Collectors.averagingInt((Integer i) -> i))
+                ;
+        System.out.println(average);
+    }
+
+    @Test
+    public void summarizingInt() {
+       IntSummaryStatistics stat = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .stream()
+                .collect(Collectors.summarizingInt(i -> i));
+        System.out.println(stat);
+    }
+
+    @Test
+    public void joining() {
+        String result = Arrays.asList("hello", "world", "welcome")
+                .stream()
+                .collect(Collectors.joining("-_-"));
+        System.out.println(result);
+
+        result = Arrays.asList("foo")
+                .stream()
+                .collect(Collectors.joining("-_-"));
+        System.out.println(result);
+    }
+
+    @Test
+    public void reducingSum() {
+        int result = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .stream()
+                .collect(reducing(0, (i, j) -> i+j));
+        System.out.println(result);
+    }
+
+    @Test
+    public void reducingMax() {
+        Arrays.asList(1, 2, 3, 4, 5, 6)
+                .stream()
+                .collect(reducing((i, j) -> i > j ? i : j))
+        .ifPresent(System.out::println);
+        ;
+    }
+
+    @Test
+    public void reducingList() {
+        List<Integer> result = Arrays.asList(1, 2, 3, 4, 5, 6)
+                .stream()
+                .collect(reducing(
+                        new ArrayList<>()
+                        , (Integer i) -> {
+                    List<Integer> l = new ArrayList<>();
+                    l.add(i);
+                    return l;
+                }, (List<Integer> bl, List<Integer> l) -> {
+                    bl.addAll(l);
+                    return bl;
+                }));
+
+        result.forEach(System.out::println);
+    }
+
+    @Test
+    public void reduceList() {
+        Arrays.asList(1, 2, 3, 4, 5)
+                .stream()
+                .reduce(new ArrayList<>(), (List<Integer> l, Integer i) -> {
+                    l.add(i);
+                    return l;
+                }, (List<Integer> bl, List<Integer> l) -> {
+                    bl.addAll(l);
+                    return bl;
+                }).forEach(System.out::println);
     }
 }
